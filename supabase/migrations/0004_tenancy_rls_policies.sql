@@ -6,8 +6,8 @@
 --        di un nuovo tenant (vedi docs/adr/0003-self-serve-tenant-creation.md):
 --        nessuna policy INSERT permette scritture dirette su `tenants` da
 --        `authenticated` (regola d'oro #1: la creazione passa da una funzione SQL).
--- Rollback: drop function if exists public.api_create_tenant(text, citext);
---           drop function if exists private.create_tenant_with_owner(text, citext);
+-- Rollback: drop function if exists public.api_create_tenant(text, extensions.citext);
+--           drop function if exists private.create_tenant_with_owner(text, extensions.citext);
 --           drop policy if exists tenants_select, tenants_insert, tenants_update, tenants_delete on public.tenants;
 --           drop policy if exists tenant_boundary, properties_select, properties_insert, properties_update, properties_delete on public.properties;
 --           drop policy if exists tenant_boundary, memberships_select, memberships_insert, memberships_update, memberships_delete on public.memberships;
@@ -63,7 +63,7 @@ create policy memberships_delete on public.memberships for delete to authenticat
   using ((select private.has_tenant_role(tenant_id, 'owner')));
 
 -- ── bootstrap: creazione self-serve di un nuovo tenant + owner ────────────────
-create or replace function private.create_tenant_with_owner(p_name text, p_slug citext)
+create or replace function private.create_tenant_with_owner(p_name text, p_slug extensions.citext)
 returns public.tenants
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -84,14 +84,14 @@ begin
 end;
 $$;
 
-revoke all on function private.create_tenant_with_owner(text, citext) from public, anon, authenticated;
-grant execute on function private.create_tenant_with_owner(text, citext) to service_role;
+revoke all on function private.create_tenant_with_owner(text, extensions.citext) from public, anon, authenticated;
+grant execute on function private.create_tenant_with_owner(text, extensions.citext) to service_role;
 
-create or replace function public.api_create_tenant(p_name text, p_slug citext)
+create or replace function public.api_create_tenant(p_name text, p_slug extensions.citext)
 returns public.tenants
 language sql security definer set search_path = '' as $$
   select * from private.create_tenant_with_owner(p_name, p_slug);
 $$;
 
-revoke all on function public.api_create_tenant(text, citext) from public, anon;
-grant execute on function public.api_create_tenant(text, citext) to authenticated;
+revoke all on function public.api_create_tenant(text, extensions.citext) from public, anon;
+grant execute on function public.api_create_tenant(text, extensions.citext) to authenticated;

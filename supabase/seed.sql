@@ -1,4 +1,4 @@
--- Seed demo per sviluppo locale (M1: tenancy; M2: anagrafiche).
+-- Seed demo per sviluppo locale (M1: tenancy; M2: anagrafiche; M3: inventario).
 -- Crea un tenant demo con un owner e una property, per poter accedere subito
 -- a Supabase Studio / staging locale senza passare dal flusso di signup.
 -- Password demo: "demo1234" (solo locale, mai in produzione).
@@ -11,7 +11,7 @@ insert into auth.users (
   '00000000-0000-0000-0000-000000000000',
   '00000000-0000-0000-0000-000000000001',
   'authenticated', 'authenticated', 'demo-owner@gaiapms.dev',
-  crypt('demo1234', gen_salt('bf')), now(),
+  extensions.crypt('demo1234', extensions.gen_salt('bf')), now(),
   '{}', '{}', now(), now(), '', '', '', ''
 );
 
@@ -50,3 +50,19 @@ insert into public.taxes (tenant_id, property_id, kind, name, rate_bps) values
 
 insert into public.taxes (tenant_id, property_id, kind, name, amount_minor) values
   ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000b1', 'city_tax', 'Tassa di soggiorno', 200);
+
+-- M3: inventario e prezzi per i prossimi 30 giorni, cosi' api_search_availability
+-- restituisce subito qualcosa di utile in locale.
+insert into public.inventory (tenant_id, property_id, room_type_id, stay_date, total, sold, blocked)
+select '00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000b1', rt.id, d::date,
+       case when rt.id = '00000000-0000-0000-0000-0000000000c1' then 2 else 1 end, 0, 0
+from (values ('00000000-0000-0000-0000-0000000000c1'::uuid), ('00000000-0000-0000-0000-0000000000c2'::uuid)) as rt(id)
+cross join generate_series(current_date, current_date + interval '30 days', interval '1 day') as d;
+
+insert into public.rate_prices (tenant_id, property_id, rate_plan_id, room_type_id, stay_date, occupancy, amount_minor)
+select '00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000b1', rp.id, rt.id, d::date, 2,
+       case when rt.id = '00000000-0000-0000-0000-0000000000c1' then 12000 else 19000 end
+       + case when rp.id = '00000000-0000-0000-0000-0000000000d1' then 1500 else 0 end
+from (values ('00000000-0000-0000-0000-0000000000d1'::uuid), ('00000000-0000-0000-0000-0000000000d2'::uuid)) as rp(id)
+cross join (values ('00000000-0000-0000-0000-0000000000c1'::uuid), ('00000000-0000-0000-0000-0000000000c2'::uuid)) as rt(id)
+cross join generate_series(current_date, current_date + interval '30 days', interval '1 day') as d;

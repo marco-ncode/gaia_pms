@@ -9,7 +9,7 @@
 create table public.tenants (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  slug citext unique not null,
+  slug extensions.citext unique not null,
   plan text not null default 'starter',
   settings jsonb not null default '{}',
   created_at timestamptz not null default now()

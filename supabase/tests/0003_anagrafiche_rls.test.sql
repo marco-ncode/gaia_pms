@@ -37,11 +37,11 @@ insert into auth.users (
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
   confirmation_token, email_change, email_change_token_new, recovery_token
 ) values
-  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'authenticated', 'authenticated', 'owner-a2@test.local', crypt('x', gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'authenticated', 'authenticated', 'gm-a2@test.local', crypt('x', gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'authenticated', 'authenticated', 'frontdesk-a2@test.local', crypt('x', gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'authenticated', 'authenticated', 'accounting-a2@test.local', crypt('x', gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'authenticated', 'authenticated', 'owner-b2@test.local', crypt('x', gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', '');
+  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'authenticated', 'authenticated', 'owner-a2@test.local', extensions.crypt('x', extensions.gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'authenticated', 'authenticated', 'gm-a2@test.local', extensions.crypt('x', extensions.gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'authenticated', 'authenticated', 'frontdesk-a2@test.local', extensions.crypt('x', extensions.gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'authenticated', 'authenticated', 'accounting-a2@test.local', extensions.crypt('x', extensions.gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1', 'authenticated', 'authenticated', 'owner-b2@test.local', extensions.crypt('x', extensions.gen_salt('bf')), now(), '{}', '{}', now(), now(), '', '', '', '');
 
 insert into public.tenants (id, name, slug) values
   ('11111111-1111-1111-1111-111111111111', 'Tenant A2', 'tenant-a2'),

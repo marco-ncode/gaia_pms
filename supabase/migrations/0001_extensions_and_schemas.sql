@@ -1,14 +1,22 @@
 -- Migration: 0001_extensions_and_schemas
 -- Scopo: abilita le estensioni Postgres richieste dal dominio e crea gli schemi
 --        applicativi previsti da CLAUDE.md §2 (private, api, audit, integrations, billing).
+--        Le estensioni relocatable vanno esplicitamente nello schema `extensions`
+--        (convenzione piattaforma Supabase, gia' nel search_path via
+--        `extra_search_path` di config.toml): qualsiasi funzione SECURITY DEFINER
+--        con `set search_path = ''` deve quindi chiamarle come `extensions.*`
+--        (es. `extensions.hmac(...)` in 0013), mai senza qualificare lo schema.
 -- Rollback: drop schema if exists private, api, audit, integrations, billing cascade;
 --           drop extension if exists pg_cron, pg_trgm, citext, btree_gist, pgcrypto;
+--           drop schema if exists extensions;
 --           (nessuna tabella dipende ancora da questi oggetti in questa milestone)
 
-create extension if not exists pgcrypto;
-create extension if not exists btree_gist;
-create extension if not exists citext;
-create extension if not exists pg_trgm;
+create schema if not exists extensions;
+
+create extension if not exists pgcrypto with schema extensions;
+create extension if not exists btree_gist with schema extensions;
+create extension if not exists citext with schema extensions;
+create extension if not exists pg_trgm with schema extensions;
 create extension if not exists pg_cron;
 
 -- public: tabelle di dominio con RLS, esposte via PostgREST.
