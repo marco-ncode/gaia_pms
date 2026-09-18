@@ -1,0 +1,3 @@
+-- Seed demo per sviluppo locale.
+-- Vuoto in M0: non esistono ancora tabelle di dominio (tenants/properties arrivano in M1).
+-- Popolato progressivamente milestone per milestone.

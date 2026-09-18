@@ -1,0 +1,28 @@
+{
+  "name": "gaia-pms",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "supabase": "supabase",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "gen:types": "supabase gen types typescript --local > packages/domain-types/src/database.ts"
+  },
+  "type": "module",
+  "devDependencies": {
+    "eslint": "catalog:",
+    "supabase": "^2.117.0",
+    "turbo": "^2.5.0",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:"
+  }
+}

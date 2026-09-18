@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  PNPM_VERSION: "10.33.0"
+
+jobs:
+  static-checks:
+    name: Lint, typecheck, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  migration-gates:
+    name: Gate migrazioni (numerazione, rollback, service_role, policy RLS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/scripts/lint-migrations.sh
+      - run: bash .github/scripts/grep-service-role.sh
+      - run: bash .github/scripts/grep-rls-policies.sh
+
+  db-rls-gate:
+    name: DB reset, RLS su ogni tabella, pgTAP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - run: supabase db start
+      - name: Verifica RLS attiva su ogni tabella public
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          set -euo pipefail
+          count=$(psql "$DB_URL" -Atqc \
+            "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace \
+             where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity;")
+          if [ "$count" != "0" ]; then
+            echo "::error::Trovate tabelle in public senza RLS attiva (relrowsecurity = false)"
+            exit 1
+          fi
+      - run: supabase test db
